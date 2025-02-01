@@ -83,7 +83,7 @@ export function Board({ n = 4 }) {
       window.removeEventListener('keydown', handleKeyDown)
     }
   })
-
+  const buttonText = onGoing == "1" ? "Reset" : "Play Again"
   return (
     <main className="board">
       <h1>2048</h1>
@@ -102,7 +102,7 @@ export function Board({ n = 4 }) {
           })
         }
       </section>
-      <button onClick={resetGame}>Reset</button>
+      <button onClick={resetGame}>{buttonText}</button>
 
       {onGoing == "2" && (
         <section className="game-over">
@@ -112,9 +112,7 @@ export function Board({ n = 4 }) {
               <p>Score:</p>
               <strong>{score}</strong>
             </div>
-
-            <button onClick={resetGame}>
-              Play again</button>
+            Do you know the highest theoretical tile you can get is <strong>131072</strong>!
           </div>
         </section>
       )}
