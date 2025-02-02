@@ -4,6 +4,7 @@ import { Tile } from './Tile'
 import { Score } from './Score'
 import { initializeBoard, addRandom, moveUp, moveDown, moveLeft, moveRight, areProbablyJsonIsomorphic, checkOnGoing } from '../logic'
 import { db, collection, runTransaction, doc, addDoc } from '../firebase';
+import { useSwipeable } from 'react-swipeable'
 // import { BOARD } from '../constants'
 
 export function Board({ n = 4 }) {
@@ -102,33 +103,61 @@ export function Board({ n = 4 }) {
     }
   }, [board, score, bestScore, onGoing, username])
 
+  const performMove = (direction) => {
+    let newBoard = board.slice()
+    let newScore = 0
+    switch (direction) {
+      case 'left':
+        [newBoard, newScore] = moveLeft(board)
+        break
+      case 'right':
+        [newBoard, newScore] = moveRight(board)
+        break
+      case 'up':
+        [newBoard, newScore] = moveUp(board)
+        break
+      case 'down':
+        [newBoard, newScore] = moveDown(board)
+        break
+      default:
+        return
+    }
+    if (areProbablyJsonIsomorphic(board, newBoard)) {
+      return
+    }
+
+    newBoard = addRandom(newBoard)
+    setBoard(newBoard)
+    setScore(score + newScore)
+  }
+
   useEffect(() => {
     const handleKeyDown = (event) => {
-      let newBoard = board.slice()
-      let newScore = 0
-      switch (event.key) {
-        case 'ArrowUp':
-          [newBoard, newScore] = moveUp(board)
-          break
-        case 'ArrowDown':
-          [newBoard, newScore] = moveDown(board)
-          break
-        case 'ArrowLeft':
-          [newBoard, newScore] = moveLeft(board)
-          break
-        case 'ArrowRight':
-          [newBoard, newScore] = moveRight(board)
-          break
-        default:
-          break
-      }
-      if (areProbablyJsonIsomorphic(board, newBoard)) {
-        return
+      if (
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowRight' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'ArrowDown'
+      ) {
+        event.preventDefault()
       }
 
-      newBoard = addRandom(newBoard)
-      setBoard(newBoard)
-      setScore(score + newScore)
+      switch (event.key) {
+        case 'ArrowLeft':
+          performMove('left')
+          break
+        case 'ArrowRight':
+          performMove('right')
+          break
+        case 'ArrowUp':
+          performMove('up')
+          break
+        case 'ArrowDown':
+          performMove('down')
+          break
+        default:
+          return
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -138,6 +167,15 @@ export function Board({ n = 4 }) {
     }
   })
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => performMove('left'),
+    onSwipedRight: () => performMove('right'),
+    onSwipedUp: () => performMove('up'),
+    onSwipedDown: () => performMove('down'),
+    preventDefaultTouchmoveEvent: true,
+    // trackMouse: true 
+  })
+
   const saveText = username != '' ? "Play Again" : "Save score"
   const formText = username != '' ? "Username:" : "Would you like to save your score?"
   return (
@@ -145,7 +183,7 @@ export function Board({ n = 4 }) {
       <h1>2048</h1>
       <p>{username === '' ? "Complete a game to set username" : ""}</p>
       <Score score={score} bestScore={bestScore} />
-      <section className="game">
+      <section className="game" {...swipeHandlers}>
         {
           board.map((value, index) => {
             return (
