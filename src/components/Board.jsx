@@ -3,6 +3,7 @@ import { PropTypes } from 'prop-types'
 import { Tile } from './Tile'
 import { Score } from './Score'
 import { initializeBoard, addRandom, moveUp, moveDown, moveLeft, moveRight, areProbablyJsonIsomorphic, checkOnGoing } from '../logic'
+import { db, collection, runTransaction, doc, addDoc } from '../firebase';
 // import { BOARD } from '../constants'
 
 export function Board({ n = 4 }) {
@@ -27,6 +28,58 @@ export function Board({ n = 4 }) {
     return savedBoard ? JSON.parse(savedBoard) : initialBoard
   })
 
+  const [username, setUsername] = useState(() => {
+    const savedUsername = window.localStorage.getItem('username')
+    return savedUsername ? JSON.parse(savedUsername) : ''
+  })
+
+  const handleSaveScore = async () => {
+    handleSaveGame()
+    if (!username.trim()) return;
+
+    try {
+      const usernameTrim = username.trim()
+      const scoresRef = collection(db, "scores")
+      const userDocRef = doc(scoresRef, usernameTrim)
+
+      await runTransaction(db, async (transaction) => {
+        const docSnap = await transaction.get(userDocRef);
+
+        if (docSnap.exists()) {
+          const currentScore = docSnap.data().score;
+          if (score > currentScore) {
+            transaction.update(userDocRef, {
+              score: score,
+              date: new Date()
+            })
+          }
+        } else {
+          transaction.set(userDocRef, {
+            name: username.trim(),
+            score: score,
+            date: new Date()
+          })
+        }
+      })
+      resetGame()
+    } catch (error) {
+      console.error("Failed to save score: ", error);
+    }
+  }
+
+  const handleSaveGame = async () => {
+    if (score == 0) return
+    try {
+      await addDoc(collection(db, "games"), {
+        name: username,
+        score: score,
+        date: new Date()
+      });
+    } catch (error) {
+      console.error("Error saving game: ", error);
+    }
+  };
+
   const resetGame = () => {
     setBestScore(Math.max(score, bestScore))
     setBoard(initializeBoard(n))
@@ -42,11 +95,12 @@ export function Board({ n = 4 }) {
     window.localStorage.setItem('score', JSON.stringify(score))
     window.localStorage.setItem('bestScore', JSON.stringify(bestScore))
     window.localStorage.setItem('onGoing', JSON.stringify(onGoing))
+    window.localStorage.setItem('username', JSON.stringify(username))
 
     if (!checkOnGoing(board)) {
       setOnGoing("2")
     }
-  }, [board, score, bestScore, onGoing])
+  }, [board, score, bestScore, onGoing, username])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -83,10 +137,13 @@ export function Board({ n = 4 }) {
       window.removeEventListener('keydown', handleKeyDown)
     }
   })
-  const buttonText = onGoing == "1" ? "Reset" : "Play Again"
+
+  const saveText = username != '' ? "Play Again" : "Save score"
+  const formText = username != '' ? "Username:" : "Would you like to save your score?"
   return (
     <main className="board">
       <h1>2048</h1>
+      <p>{username === '' ? "Complete a game to set username" : ""}</p>
       <Score score={score} bestScore={bestScore} />
       <section className="game">
         {
@@ -102,7 +159,7 @@ export function Board({ n = 4 }) {
           })
         }
       </section>
-      <button onClick={resetGame}>{buttonText}</button>
+      <button onClick={() => { handleSaveGame(); resetGame(); }}>Reset</button>
 
       {onGoing == "2" && (
         <section className="game-over">
@@ -112,7 +169,16 @@ export function Board({ n = 4 }) {
               <p>Score:</p>
               <strong>{score}</strong>
             </div>
-            Do you know the highest theoretical tile you can get is <strong>131072</strong>!
+            <div className="score-form">
+              <h3>{formText}</h3>
+              <input
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <button onClick={handleSaveScore}>{saveText}</button>
+            </div>
           </div>
         </section>
       )}
