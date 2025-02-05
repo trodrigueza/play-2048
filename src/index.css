@@ -57,20 +57,7 @@ button:focus-visible {
   outline: 4px auto #de3e3e;
 } */
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
 
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
-}
 
 .board {
   width: fit-content;
@@ -265,11 +252,16 @@ button:focus-visible {
   height: 30em;
   display: flex;
   place-items: center;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.645);
   border-style: solid;
   border-color: #f9f9f9;
-  transform: translateX(-1em) translateY(-33.3em);
+  transform: translateX(-1.5em) translateY(-33.3em);
   border-radius: 8px;
+}
+
+.game-over button {
+  width: 8em;
+  font-size: small;
 }
 
 .game-over div {
@@ -278,6 +270,7 @@ button:focus-visible {
   place-items: center;
   gap: 0.5em;
   margin-bottom: 2em;
+  justify-content: center;
 }
 
 .game-over p {
@@ -286,7 +279,7 @@ button:focus-visible {
 
 .score-form {
   position: absolute;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0);
   padding: 20px;
   border-radius: 10px;
   z-index: 1000;
@@ -294,9 +287,14 @@ button:focus-visible {
 }
 
 .score-form input {
+  background-color: #ffffff;
   margin: 10px;
   padding: 5px;
+  width: 7em;
   font-size: 1em;
+  border-radius: 8px;
+  border-color: #ffffff;
+  color: #000000;
 }
 
 .top-scores {
@@ -316,4 +314,55 @@ button:focus-visible {
   margin: 5px 0;
   transition: all 0.5s ease;
   transform-origin: top;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+
+  button {
+    background-color: #f9f9f9;
+  }
+
+  .score {
+    background-color: #bbbbbb;
+  }
+
+  .score-current,
+  .score-best {
+    background-color: #f9f9f9;
+  }
+
+  .board .game {
+    background-color: #bbbbbb;
+    border-color: #bbbbbb;
+  }
+
+  .tile {
+    background-color: #f9f9f9;
+  }
+
+  .game-over {
+    background-color: rgba(209, 209, 209, 0.84);
+    border-color: #bbbbbb;
+  }
+
+  .score-form {
+    background: #d1d1d100;
+  }
+
+  .top-scores {
+    background: #bbbbbb;
+  }
+
+  .score-form input {
+    background-color: #ffffff;
+    border-color: #ffffff;
+  }
 }

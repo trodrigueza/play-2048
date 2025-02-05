@@ -177,7 +177,7 @@ export function Board({ n = 4 }) {
   })
 
   const saveText = username != '' ? "Play Again" : "Save score"
-  const formText = username != '' ? "Username:" : "Would you like to save your score?"
+  const formText = username != '' ? "Game over" : "Would you like to save your score?"
   return (
     <main className="board">
       <h1>2048</h1>
@@ -201,22 +201,15 @@ export function Board({ n = 4 }) {
 
       {onGoing == "2" && (
         <section className="game-over">
-          <div>
-            <h2>Game Over</h2>
-            <div>
-              <p>Score:</p>
-              <strong>{score}</strong>
-            </div>
-            <div className="score-form">
-              <h3>{formText}</h3>
-              <input
-                type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <button onClick={handleSaveScore}>{saveText}</button>
-            </div>
+          <div className="score-form">
+            <h3>{formText}</h3>
+            <input
+              type="text"
+              placeholder="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <button onClick={handleSaveScore}>{saveText}</button>
           </div>
         </section>
       )}
