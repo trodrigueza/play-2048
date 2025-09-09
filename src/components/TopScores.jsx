@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { db, collection, query, orderBy, limit, onSnapshot } from '../firebase'
+import { useEffect, useState } from "react";
+import { db, collection, query, orderBy, limit, onSnapshot } from "../firebase";
 
 export function TopScores() {
   const [scores, setScores] = useState([]);
@@ -8,7 +8,7 @@ export function TopScores() {
     const q = query(
       collection(db, "scores"),
       orderBy("score", "desc"),
-      limit(5)
+      limit(5),
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -29,9 +29,9 @@ export function TopScores() {
         {scores.map((score, index) => (
           <li key={index}>
             {score.name}: {score.score}
-            {index === 0 && " 🏆"}
-            {index === 1 && " 🥈"}
-            {index === 2 && " 🥉"}
+            {index === 0 && " :)"}
+            {index === 1}
+            {index === 2}
           </li>
         ))}
       </ol>
